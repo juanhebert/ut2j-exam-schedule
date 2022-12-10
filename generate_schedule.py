@@ -6,42 +6,51 @@ from zoneinfo import ZoneInfo
 import toml
 
 config = toml.load("config.toml")
-timezone = config["timezone"]
+timezone = ZoneInfo(config["timezone"])
 in_file = config["in_file"]
 out_file = config["out_file"]
 subject_codes = config["subject_codes"]
 location = config["location"]
 
-c = Calendar()
-tzinfo = ZoneInfo(timezone)
 
-with open(in_file) as calendarFile:
-    reader = csv.reader(calendarFile)
-    exams = [row for row in reader if row[4] in subject_codes]
+def make_datetime(date, time):
+    datestring_format = "%d/%m/%Y %H:%M"
+    datestring = "{} {}".format(date, time)
+    return datetime.strptime(datestring, datestring_format).replace(tzinfo=timezone)
 
-for row in exams:
-    datetime_format = "%d/%m/%Y %H:%M"
-    start_string = "{} {}".format(row[1], row[2])
-    start_datetime = datetime.strptime(start_string, datetime_format)
-    start_datetime = start_datetime.replace(tzinfo=tzinfo)
-    end_string = "{} {}".format(row[1], row[3])
-    end_datetime = datetime.strptime(end_string, datetime_format)
-    end_datetime = end_datetime.replace(tzinfo=tzinfo)
 
-    e = Event()
-    e.created = datetime.now()
-    e.name = "{} ({})".format(row[5], row[4])
-    e.begin = start_datetime
-    e.end = end_datetime
-    e.location = location
-    if len(row[7]) > 0:
-        e.description = "Salle: {}".format(row[7])
-    else:
-        e.description = "Modalité: {}".format(row[9].lower())
-    c.events.add(e)
+def make_exam(row):
+    date = row[1]
+    start = row[2]
+    end = row[3]
+    code = row[4]
+    name = row[5]
+    room = row[7]
+    return {
+        "name": "{} ({})".format(name, code),
+        "description": "Salle: {}".format(room) if len(room) > 0 else "Non-présentiel",
+        "start": make_datetime(date, start),
+        "end": make_datetime(date, end),
+    }
 
-# Create the out directory if it doesn't exist
-makedirs(path.dirname(out_file), exist_ok=True)
 
-with open(out_file, "w") as schedule_file:
-    schedule_file.writelines(c.serialize_iter())
+if __name__ == "__main__":
+    with open(in_file) as calendarFile:
+        reader = csv.reader(calendarFile)
+        exams = [make_exam(row) for row in reader if row[4] in subject_codes]
+
+    c = Calendar()
+    for exam in exams:
+        e = Event()
+        e.created = datetime.now()
+        e.name = exam["name"]
+        e.begin = exam["start"]
+        e.end = exam["end"]
+        e.location = location
+        e.description = exam["description"]
+        c.events.add(e)
+
+    # Create the out directory if it doesn't exist
+    makedirs(path.dirname(out_file), exist_ok=True)
+    with open(out_file, "w") as schedule_file:
+        schedule_file.writelines(c.serialize_iter())
