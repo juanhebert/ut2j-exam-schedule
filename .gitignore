@@ -2,3 +2,4 @@
 env/
 out/
 exam_data.csv
+config.toml
