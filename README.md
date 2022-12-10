@@ -7,8 +7,3 @@
   et le convertir au format `.csv`.
 - Nommer le fichier obtenu `exam_data.csv` et le placer à la racine du projet.
 - Lancer `generate_schedule.py`.
-
-## Dépendances
-
-- `toml`
-- `ics`
