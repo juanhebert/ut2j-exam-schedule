@@ -29,6 +29,7 @@ for row in exams:
     end_datetime = end_datetime.replace(tzinfo=tzinfo)
 
     e = Event()
+    e.created = datetime.now()
     e.name = "{} ({})".format(row[5], row[4])
     e.begin = start_datetime
     e.end = end_datetime
