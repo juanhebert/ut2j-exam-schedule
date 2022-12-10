@@ -34,11 +34,7 @@ def make_exam(row):
     }
 
 
-if __name__ == "__main__":
-    with open(in_file) as calendarFile:
-        reader = csv.reader(calendarFile)
-        exams = [make_exam(row) for row in reader if row[4] in subject_codes]
-
+def make_calendar(exams):
     c = Calendar()
     for exam in exams:
         e = Event()
@@ -49,7 +45,14 @@ if __name__ == "__main__":
         e.location = location
         e.description = exam["description"]
         c.events.add(e)
+    return c
 
+
+if __name__ == "__main__":
+    with open(in_file) as calendarFile:
+        reader = csv.reader(calendarFile)
+        exams = [make_exam(row) for row in reader if row[4] in subject_codes]
+    c = make_calendar(exams)
     # Create the out directory if it doesn't exist
     makedirs(path.dirname(out_file), exist_ok=True)
     with open(out_file, "w") as schedule_file:
