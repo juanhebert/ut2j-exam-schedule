@@ -1,0 +1,21 @@
+# Path of the CSV file containing the exam schedule for a particular semester
+in_file = "exam_data.csv"
+
+# Path of the output calendar file
+out_file = "out/schedule.ics"
+
+# Subject codes
+subject_codes = [
+    "SO00501T",
+    "SO00502T",
+    "SOB0503T",
+    "SOC0503T",
+    "SO00505T",
+    "ESB1A0LT"
+]
+
+# Location of the university
+location = "5 Allée Antonio Machado, 31058 Toulouse, France"
+
+# IANA timezone code
+timezone = "Europe/Paris"
